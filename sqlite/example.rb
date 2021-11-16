@@ -1,31 +1,35 @@
 require 'sqlite3'
+require 'benchmark'
 # https://www.rubydoc.info/gems/sqlite3/1.4.2/SQLite3/Database
 
-# Open a database
-db = SQLite3::Database.new "smallprimes.db"
+puts Benchmark.measure {
 
-# Wrap in a transaction for speed
-db.transaction
-# db.execute "DELETE FROM PRIMES;" # Careful!
-# db.execute "INSERT INTO primes (number, pos) VALUES (2, 1), (3, 2), (5, 3), (7, 4);"
-db.commit
+   # Open a database
+   db = SQLite3::Database.new "smallprimes.db"
 
-# By default, results are arrays
-db.results_as_hash = true
+   # Wrap in a transaction for speed
+   # db.transaction
+   # db.execute "DELETE FROM PRIMES;" # Careful!
+   # db.execute "INSERT INTO primes (number, pos) VALUES (2, 1), (3, 2), (5, 3), (7, 4);"
+   # db.commit
 
-res = []
-# Select rows
-db.execute("SELECT * FROM primes") do |row|
-   res.append row
-end
+   # By default, results are arrays
+   db.results_as_hash = true
 
-# Get one row only
-row1 = db.get_first_row("SELECT * FROM primes WHERE number = ?", 2)
-# p row1
+   # Select rows
+   res = []
+   db.execute("SELECT * FROM primes WHERE number < 1000000") { |row| res.append row }
+   puts "rows: #{res.size}"
 
-# Get scalar
-first_prime = db.get_first_value("SELECT number FROM primes where pos = 1;")
-puts first_prime
+   # Get one row only
+   # row1 = db.get_first_row("SELECT * FROM primes WHERE pos = ?", 1000000)
+   # row1
 
-# Close
-db.close
+   # Get scalar
+   # scalar = db.get_first_value("SELECT COUNT(*) FROM primes")
+   # puts scalar
+
+   # Close
+   db.close
+
+} # Benchmark.measure
